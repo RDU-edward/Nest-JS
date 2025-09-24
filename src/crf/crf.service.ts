@@ -9,7 +9,7 @@ export class CrfService {
   async create(createCrfDto: CreateCrfDto) {
     const result = await this.database.callStoredProcedure('insertCrf', [
       createCrfDto.requestor_name,
-      createCrfDto.department.join(','),
+      createCrfDto.department,
       createCrfDto.change_description,
       createCrfDto.justification,
       createCrfDto.assets_systems,
@@ -32,17 +32,6 @@ export class CrfService {
     return result;
   }
 
-  // async findAll() {
-  //   const [result] = await this.database.callStoredProcedure('getAllCrf');
-  //   const transformedResult = result.map((item: any) => ({
-  //     ...item,
-  //     department: item.department
-  //       ? item.department.split(',').map((dept: string) => dept.trim())
-  //       : [],
-  //   }));
-  //   return transformedResult;
-  // }
-
   async updateCrf(UpdateCrfDto: UpdateCrfDto) {
     try {
       const result = await this.database.callStoredProcedure('updateCrf', [
@@ -57,16 +46,4 @@ export class CrfService {
       throw new Error('Failed to update CRF.');
     }
   }
-
-  // findOne(id: number) {
-  //   return `This action returns a #${id} crf`;
-  // }
-
-  // update(id: number, updateCrfDto: UpdateCrfDto) {
-  //   return `This action updates a #${id} crf`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} crf`;
-  // }
 }

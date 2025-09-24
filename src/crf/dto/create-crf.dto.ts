@@ -1,6 +1,6 @@
 export class CreateCrfDto {
   requestor_name: string;
-  department: string[];
+  department: string;
   change_description: string;
   justification: string;
   assets_systems: string;
