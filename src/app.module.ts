@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import typeOrmConfigFactory from 'typeorm.config';
 import { CrfModule } from './crf/crf.module';
+import { SmartVoteModule } from './smart-vote/smart-vote.module';
 
 @Module({
   imports: [
@@ -15,6 +16,8 @@ import { CrfModule } from './crf/crf.module';
     }),
 
     CrfModule,
+
+    SmartVoteModule,
     // ExampleModule,
     // MerchantModule,
   ],

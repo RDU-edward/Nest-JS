@@ -12,7 +12,7 @@ export class CrfController {
   }
 
   @Get('all-crf')
-  findAll() {
+  findAllCandidates() {
     return this.crfService.findAll();
   }
 
