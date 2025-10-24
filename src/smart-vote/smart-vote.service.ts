@@ -179,22 +179,22 @@ export class SmartVoteService {
       // Check if the result is null or undefined (no rows affected)
       if (!result) {
         throw new HttpException(
-          'Candidacy update failed, no data found',
+          'Candidacy Schedule update failed, no data found',
           HttpStatus.NOT_FOUND,
         );
       }
 
       return {
         success: true,
-        message: 'Candidacy updated successfully.',
+        message: 'Candidacy schedule updated successfully.',
         data: result, // You can return the result or just the ID depending on what your stored procedure returns
       };
     } catch (error) {
       // Log the error with more context for debugging
-      console.error('Error updating candidacy:', error);
+      console.error('Error updating candidacy schedule:', error);
 
       throw new HttpException(
-        'Failed to update candidacy. Please try again later.',
+        'Failed to update candidacy schedule. Please try again later.',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
@@ -215,11 +215,28 @@ export class SmartVoteService {
         updateSmartVoteDto.status,
         updateSmartVoteDto.opened_by,
       ]);
+
+      // Check if the result is null or undefined (no rows affected)
+      if (!result) {
+        throw new HttpException(
+          'Election schedule update failed, no data found',
+          HttpStatus.NOT_FOUND,
+        );
+      }
       return {
         success: true,
-        message: 'Election Updated Successfully.',
+        message: 'Election schedule updated successfully.',
+        data: result,
       };
-    } catch (error) {}
+    } catch (error) {
+      // Log the error with more context for debugging
+      console.error('Error updating election schedule:', error);
+
+      throw new HttpException(
+        'Failed to update election schedule',
+        HttpStatus.NOT_FOUND,
+      );
+    }
   }
 
   findOne(id: number) {
