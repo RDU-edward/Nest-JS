@@ -1,4 +1,4 @@
-export class CreateSmartVoteCandidatesDto {
+export class CandidatesDto {
   student_id: string;
   firstname: string;
   lastname: string;
@@ -13,7 +13,7 @@ export class CreateSmartVoteCandidatesDto {
   filed_date: string;
 }
 
-export class CreateSmartVoteVotersDto {
+export class VotersDto {
   student_id: string;
   firstname: string;
   lastname: string;
@@ -22,7 +22,7 @@ export class CreateSmartVoteVotersDto {
   email: string;
   registered_at: string;
 }
-export class CreateSmartVoteVotesDto {
+export class VotesDto {
   voters_id: string;
   firstname: string;
   lastname: string;
@@ -33,7 +33,7 @@ export class CreateSmartVoteVotesDto {
   vice_president: string;
   voted_date: string;
 }
-export class CreateSmartVoteAdminsDto {
+export class AdminDto {
   admin_id: string;
   firstname: string;
   lastname: string;
@@ -41,7 +41,7 @@ export class CreateSmartVoteAdminsDto {
   admin_dept: string;
 }
 
-export class UpdateSmartVoteCandidacy {
+export class CandidacyDto {
   id: number;
   candidacy_type: string;
   open_date: string;
@@ -50,7 +50,7 @@ export class UpdateSmartVoteCandidacy {
   opened_by: string;
 }
 
-export class UpdateSmartVoteElection {
+export class ElectionDto {
   id: number;
   election_type: string;
   open_date: string;

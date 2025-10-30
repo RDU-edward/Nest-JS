@@ -1,11 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import {
-  CreateSmartVoteAdminsDto,
-  CreateSmartVoteCandidatesDto,
-  CreateSmartVoteVotersDto,
-  CreateSmartVoteVotesDto,
-  UpdateSmartVoteCandidacy,
-  UpdateSmartVoteElection,
+  AdminDto,
+  CandidatesDto,
+  VotersDto,
+  VotesDto,
+  CandidacyDto,
+  ElectionDto,
 } from './dto/create-smart-vote.dto';
 import { DatabaseService } from 'src/db/db.service';
 // import { UpdateSmartVoteDto } from './dto/update-smart-vote.dto';
@@ -14,24 +14,24 @@ import { DatabaseService } from 'src/db/db.service';
 export class SmartVoteService {
   constructor(private readonly database: DatabaseService) {}
 
-  //Insert Candidates
-  async createCandidate(createSmartVoteDto: CreateSmartVoteCandidatesDto) {
+  //insert candidates
+  async createCandidate(smartVoteCandidate: CandidatesDto) {
     try {
       const result = await this.database.callStoredProcedure(
         'insertCandidate',
         [
-          createSmartVoteDto.student_id,
-          createSmartVoteDto.firstname,
-          createSmartVoteDto.lastname,
-          createSmartVoteDto.gender,
-          createSmartVoteDto.course,
-          createSmartVoteDto.year,
-          createSmartVoteDto.email,
-          createSmartVoteDto.position,
-          createSmartVoteDto.election_type,
-          createSmartVoteDto.party,
-          createSmartVoteDto.status,
-          createSmartVoteDto.filed_date,
+          smartVoteCandidate.student_id,
+          smartVoteCandidate.firstname,
+          smartVoteCandidate.lastname,
+          smartVoteCandidate.gender,
+          smartVoteCandidate.course,
+          smartVoteCandidate.year,
+          smartVoteCandidate.email,
+          smartVoteCandidate.position,
+          smartVoteCandidate.election_type,
+          smartVoteCandidate.party,
+          smartVoteCandidate.status,
+          smartVoteCandidate.filed_date,
         ],
       );
 
@@ -43,24 +43,53 @@ export class SmartVoteService {
     } catch (error) {
       // Optionally log the error to a logging service
       console.error('Error inserting candidate:', error);
+      return {
+        success: false,
+        message: 'Error inserting candidate',
+      };
+    }
+  }
 
-      throw new HttpException(
-        'Failed to add candidate. Please try again later.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
+  // update candidate
+  async updateCandidate(
+    student_id: string,
+    updateSmartVoteCandidate: CandidatesDto,
+  ) {
+    try {
+      const result = await this.database.callStoredProcedure(
+        'updateCandidate',
+        [updateSmartVoteCandidate.student_id, updateSmartVoteCandidate.course],
       );
+
+      // Check if the result is null or undefined (no rows affected)
+      if (result.affectedRows === 0) {
+        return {
+          success: false,
+          message: 'Update candidate failed, no data found',
+        };
+      }
+
+      return {
+        success: true,
+        message: 'Candidate updated successfully.',
+        data: result, // You can return the result or just the ID depending on what your stored procedure returns
+      };
+    } catch (error) {
+      // Log the error with more context for debugging
+      console.error('Error updating candidate', error);
     }
   }
 
   //Insert Voters
-  async createVoter(createSmartVoteDto: CreateSmartVoteVotersDto) {
+  async createVoter(smartVoteVoter: VotersDto) {
     try {
       const result = await this.database.callStoredProcedure('insertVoters', [
-        createSmartVoteDto.student_id,
-        createSmartVoteDto.firstname,
-        createSmartVoteDto.lastname,
-        createSmartVoteDto.gender,
-        createSmartVoteDto.department,
-        createSmartVoteDto.registered_at,
+        smartVoteVoter.student_id,
+        smartVoteVoter.firstname,
+        smartVoteVoter.lastname,
+        smartVoteVoter.gender,
+        smartVoteVoter.department,
+        smartVoteVoter.registered_at,
       ]);
       return {
         success: true,
@@ -79,14 +108,14 @@ export class SmartVoteService {
   }
 
   //Insert Admins
-  async createAdmin(createSmartVoteDto: CreateSmartVoteAdminsDto) {
+  async createAdmin(smartVoteAdmin: AdminDto) {
     try {
       const result = await this.database.callStoredProcedure('insertAdmins', [
-        createSmartVoteDto.admin_id,
-        createSmartVoteDto.firstname,
-        createSmartVoteDto.lastname,
-        createSmartVoteDto.email,
-        createSmartVoteDto.admin_dept,
+        smartVoteAdmin.admin_id,
+        smartVoteAdmin.firstname,
+        smartVoteAdmin.lastname,
+        smartVoteAdmin.email,
+        smartVoteAdmin.admin_dept,
       ]);
       return {
         success: true,
@@ -106,18 +135,18 @@ export class SmartVoteService {
 
   //Insert Votes
 
-  async createVotes(createSmartVoteDto: CreateSmartVoteVotesDto) {
+  async createVotes(smartVoteVotes: VotesDto) {
     try {
       const result = await this.database.callStoredProcedure('insertVotes', [
-        createSmartVoteDto.voters_id,
-        createSmartVoteDto.firstname,
-        createSmartVoteDto.lastname,
-        createSmartVoteDto.email,
-        createSmartVoteDto.department,
-        createSmartVoteDto.election_type,
-        createSmartVoteDto.president,
-        createSmartVoteDto.vice_president,
-        createSmartVoteDto.voters_id,
+        smartVoteVotes.voters_id,
+        smartVoteVotes.firstname,
+        smartVoteVotes.lastname,
+        smartVoteVotes.email,
+        smartVoteVotes.department,
+        smartVoteVotes.election_type,
+        smartVoteVotes.president,
+        smartVoteVotes.vice_president,
+        smartVoteVotes.voters_id,
       ]);
 
       return {
@@ -159,10 +188,7 @@ export class SmartVoteService {
   }
 
   //Update Candidacy Schedule
-  async updateCandidacy(
-    id: number,
-    updateSmartVoteDto: UpdateSmartVoteCandidacy,
-  ) {
+  async updateCandidacy(id: number, updateSmartVoteDto: CandidacyDto) {
     try {
       const result = await this.database.callStoredProcedure(
         'updateCandidacy',
@@ -177,11 +203,11 @@ export class SmartVoteService {
       );
 
       // Check if the result is null or undefined (no rows affected)
-      if (!result) {
-        throw new HttpException(
-          'Candidacy Schedule update failed, no data found',
-          HttpStatus.NOT_FOUND,
-        );
+      if (result.affectedRows === 0) {
+        return {
+          success: false,
+          message: 'Candidacy Schedule update failed, no data found',
+        };
       }
 
       return {
@@ -192,20 +218,12 @@ export class SmartVoteService {
     } catch (error) {
       // Log the error with more context for debugging
       console.error('Error updating candidacy schedule:', error);
-
-      throw new HttpException(
-        'Failed to update candidacy schedule. Please try again later.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
     }
   }
 
   //Update Election Schedule
 
-  async updateElection(
-    id: number,
-    updateSmartVoteDto: UpdateSmartVoteElection,
-  ) {
+  async updateElection(id: number, updateSmartVoteDto: ElectionDto) {
     try {
       const result = await this.database.callStoredProcedure('updateElection', [
         updateSmartVoteDto.id,
@@ -239,11 +257,11 @@ export class SmartVoteService {
     }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} smartVote`;
-  }
+  // findOne(id: number) {
+  //   return `This action returns a #${id} smartVote`;
+  // }
 
-  remove(id: number) {
-    return `This action removes a #${id} smartVote`;
-  }
+  // remove(id: number) {
+  //   return `This action removes a #${id} smartVote`;
+  // }
 }

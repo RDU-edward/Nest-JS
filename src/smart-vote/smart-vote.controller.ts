@@ -11,36 +11,48 @@ import {
 } from '@nestjs/common';
 import { SmartVoteService } from './smart-vote.service';
 import {
-  CreateSmartVoteAdminsDto,
-  CreateSmartVoteCandidatesDto,
-  CreateSmartVoteVotersDto,
-  CreateSmartVoteVotesDto,
-  UpdateSmartVoteCandidacy,
+  AdminDto,
+  CandidatesDto,
+  VotersDto,
+  VotesDto,
+  CandidacyDto,
 } from './dto/create-smart-vote.dto';
-// import { UpdateSmartVoteDto } from './dto/update-smart-vote.dto';
 
 @Controller('smart-vote')
 export class SmartVoteController {
   constructor(private readonly smartVoteService: SmartVoteService) {}
 
+  // insert candidate
   @Post('candidates')
-  createCandidate(@Body() createCandidateDto: CreateSmartVoteCandidatesDto) {
-    return this.smartVoteService.createCandidate(createCandidateDto);
+  createCandidate(@Body() smartVoteCandidate: CandidatesDto) {
+    return this.smartVoteService.createCandidate(smartVoteCandidate);
+  }
+
+  // update candidate
+  @Post('candidate-update')
+  async updateCandidate(
+    @Param('student_id') student_id: string,
+    @Body() updateSmartVoteCandidate: CandidatesDto,
+  ) {
+    return this.smartVoteService.updateCandidate(
+      student_id,
+      updateSmartVoteCandidate,
+    );
   }
 
   @Post('voters')
-  createVoter(@Body() createVoterDto: CreateSmartVoteVotersDto) {
-    return this.smartVoteService.createVoter(createVoterDto);
+  createVoter(@Body() smartVoteVoter: VotersDto) {
+    return this.smartVoteService.createVoter(smartVoteVoter);
   }
 
   @Post('admins')
-  createAdmin(@Body() createAdminDto: CreateSmartVoteAdminsDto) {
-    return this.smartVoteService.createAdmin(createAdminDto);
+  createAdmin(@Body() smartVoteAdmin: AdminDto) {
+    return this.smartVoteService.createAdmin(smartVoteAdmin);
   }
 
   @Post('votes')
-  createVotes(@Body() createVotesDto: CreateSmartVoteVotesDto) {
-    return this.smartVoteService.createVotes(createVotesDto);
+  createVotes(@Body() smartVoteVotes: VotesDto) {
+    return this.smartVoteService.createVotes(smartVoteVotes);
   }
 
   @Get('get/candidates')
@@ -56,25 +68,21 @@ export class SmartVoteController {
     }
   }
 
+  @Post('update-candidacy')
+  async update(
+    @Param('id') id: number,
+    @Body() smartVoteCandidacy: CandidacyDto,
+  ) {
+    return this.smartVoteService.updateCandidacy(id, smartVoteCandidacy);
+  }
+
   // @Get(':id')
   // findOne(@Param('id') id: string) {
   //   return this.smartVoteService.findOne(+id);
   // }
 
-  @Patch(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() updateSmartVoteDto: UpdateSmartVoteCandidacy,
-  ) {
-    const parsedId = parseInt(id, 10);
-    if (isNaN(parsedId)) {
-      throw new HttpException('Invalid ID format', HttpStatus.BAD_REQUEST);
-    }
-    return this.smartVoteService.update(parsedId, updateSmartVoteDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.smartVoteService.remove(+id);
-  }
+  // @Delete(':id')
+  // remove(@Param('id') id: string) {
+  //   return this.smartVoteService.remove(+id);
+  // }
 }

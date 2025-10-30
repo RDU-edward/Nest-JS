@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import typeOrmConfigFactory from 'typeorm.config';
-import { CrfModule } from './crf/crf.module';
 import { SmartVoteModule } from './smart-vote/smart-vote.module';
 
 @Module({
@@ -14,8 +13,6 @@ import { SmartVoteModule } from './smart-vote/smart-vote.module';
       useFactory: typeOrmConfigFactory,
       inject: [ConfigService],
     }),
-
-    CrfModule,
 
     SmartVoteModule,
     // ExampleModule,
