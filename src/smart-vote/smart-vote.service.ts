@@ -250,10 +250,10 @@ export class SmartVoteService {
       // Log the error with more context for debugging
       console.error('Error updating election schedule:', error);
 
-      throw new HttpException(
-        'Failed to update election schedule',
-        HttpStatus.NOT_FOUND,
-      );
+      // throw new HttpException(
+      //   'Failed to update election schedule',
+      //   HttpStatus.NOT_FOUND,
+      // );
     }
   }
 
