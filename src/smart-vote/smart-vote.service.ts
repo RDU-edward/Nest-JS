@@ -8,16 +8,17 @@ import {
   ElectionDto,
 } from './dto/create-smart-vote.dto';
 import { DatabaseService } from 'src/db/db.service';
+import { log } from 'console';
 // import { UpdateSmartVoteDto } from './dto/update-smart-vote.dto';
 
 @Injectable()
 export class SmartVoteService {
   constructor(private readonly database: DatabaseService) {}
 
-  //insert candidates
+  //Insert Candidates with Student Existence Check
   async createCandidate(smartVoteCandidate: CandidatesDto) {
     try {
-      const result = await this.database.callStoredProcedure(
+      const insertResult = await this.database.callStoredProcedure(
         'insertCandidate',
         [
           smartVoteCandidate.student_id,
@@ -37,11 +38,20 @@ export class SmartVoteService {
 
       return {
         success: true,
-        message: 'Added Successfully',
-        data: result,
+        message: 'Candidate added successfully',
+        data: insertResult,
       };
     } catch (error) {
-      // Optionally log the error to a logging service
+      // Check if the err
+      // or is related to the "Student ID already exists"
+      console.log(error.message);
+
+      if (error.message.includes('Student ID already exists')) {
+        return {
+          success: false,
+          message: 'This student ID already exists.',
+        };
+      }
       console.error('Error inserting candidate:', error);
       return {
         success: false,
@@ -83,27 +93,60 @@ export class SmartVoteService {
   //Insert Voters
   async createVoter(smartVoteVoter: VotersDto) {
     try {
-      const result = await this.database.callStoredProcedure('insertVoters', [
+      const result = await this.database.callStoredProcedure('findStudent', [
         smartVoteVoter.student_id,
         smartVoteVoter.firstname,
-        smartVoteVoter.lastname,
-        smartVoteVoter.gender,
-        smartVoteVoter.department,
-        smartVoteVoter.registered_at,
       ]);
-      return {
-        success: true,
-        message: 'Voter Added Successfully',
-        data: result,
-      };
-    } catch (error) {
-      // Optionally log the error to a logging service
-      console.error('Error inserting Voter:', error);
 
-      throw new HttpException(
-        'Failed to add voter. Please try again later.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      if (result[0].length === 0) {
+        return {
+          success: false,
+          message: 'Student not found in the database',
+        };
+      }
+
+      try {
+        const result = await this.database.callStoredProcedure('insertVoters', [
+          smartVoteVoter.student_id,
+          smartVoteVoter.firstname,
+          smartVoteVoter.lastname,
+          smartVoteVoter.gender,
+          smartVoteVoter.department,
+          smartVoteVoter.registered_at,
+        ]);
+        return {
+          success: true,
+          message: 'Voter Added Successfully',
+          data: result,
+        };
+      } catch (error) {
+        // Check if the err
+        // or is related to the "Student ID already exists"
+        console.log(error.message);
+
+        if (error.message.includes('Student ID already exists')) {
+          return {
+            success: false,
+            message: 'This student ID already exists.',
+          };
+        }
+        console.error('Error inserting candidate:', error);
+        return {
+          success: false,
+          message: 'Error inserting candidate',
+        };
+
+        // throw new HttpException(
+        //   'Failed to add voter. Please try again later.',
+        //   HttpStatus.INTERNAL_SERVER_ERROR,
+        // );
+      }
+    } catch (error) {
+      console.error('Error finding student:', error);
+      return {
+        success: false,
+        message: 'Error finding student',
+      };
     }
   }
 
@@ -134,7 +177,6 @@ export class SmartVoteService {
   }
 
   //Insert Votes
-
   async createVotes(smartVoteVotes: VotesDto) {
     try {
       const result = await this.database.callStoredProcedure('insertVotes', [
@@ -265,3 +307,55 @@ export class SmartVoteService {
   //   return `This action removes a #${id} smartVote`;
   // }
 }
+
+//stored procedure call examples in service file:
+
+//?findStudent:
+/* BEGIN
+ SELECT * FROM test_Test.table0 WHERE student_id = _student_id AND firstname = _firstname;  
+ END */
+
+//?insertCandidate:
+/* BEGIN
+    -- Check if the student_id already exists in the table
+    IF EXISTS (SELECT 1 FROM test_Test.table1 WHERE student_id = _student_id) THEN
+        -- If the student_id exists, exit the procedure and return an error or message
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Student ID already exists';
+    ELSE
+        -- If student_id does not exist, proceed with the insert
+        INSERT INTO test_Test.table1 (student_id, firstname, lastname, gender, course, `year`, email,
+            `position`, election_type, party, `status`, filed_date) 
+        VALUES (_student_id, _firstname, _lastname, _gender, 
+            _course, _year, _email,
+            _position, _election_type, _party, _status, _filed_date);
+    END IF;
+END*/
+
+//?insertVoters;
+/*
+BEGIN
+    -- Check if the student_id already exists in the table
+    IF EXISTS (SELECT 1 FROM test_Test.table3 WHERE student_id = _student_id) THEN
+        -- If the student_id exists, exit the procedure and return an error or message
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Student ID already exists';
+    ELSE
+        -- If student_id does not exist, proceed with the insert
+        INSERT INTO test_Test.table3 (student_id, firstname, lastname, gender, department, registered_at) 
+        VALUES (_student_id, _firstname, _lastname, _gender, _department,
+         _registered_at);
+    END IF;
+END*/
+
+//?updateCandidacy:
+/*BEGIN
+UPDATE test_Test.table2 
+SET candidacy_type = _candidacy_type,
+	 open_date = _open_date,
+	 close_date = _close_date,
+	 `status` = _status,
+	 opened_by = _opened_by
+	 WHERE id = _id;
+	 
+	  -- Optionally return the number of affected rows
+  #SELECT ROW_COUNT() AS rows_affected;
+END*/
