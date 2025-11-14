@@ -17,10 +17,9 @@ export class VotersDto {
   student_id: string;
   firstname: string;
   lastname: string;
-  gender: string;
   department: string;
   email: string;
-  registered_at: string;
+  password: string;
 }
 export class VotesDto {
   voters_id: string;

@@ -16,7 +16,9 @@ import {
   VotersDto,
   VotesDto,
   CandidacyDto,
+  ElectionDto,
 } from './dto/create-smart-vote.dto';
+import { log } from 'console';
 
 @Controller('smart-vote')
 export class SmartVoteController {
@@ -68,12 +70,44 @@ export class SmartVoteController {
     }
   }
 
+  @Post('login-voter')
+  async loginVoter(@Body() body: { student_id: string; password: string }) {
+    const { student_id, password } = body;
+
+    const loginResult = await this.smartVoteService.voterLogin(
+      student_id,
+      password,
+    );
+
+    console.log(password);
+    console.log('Login Result:', loginResult);
+    if (loginResult.success) {
+      return {
+        statusCode: 200,
+        message: loginResult.message,
+      };
+    } else {
+      return {
+        statusCode: 401,
+        message: loginResult.message,
+      };
+    }
+  }
+
   @Post('update-candidacy')
-  async update(
+  async updateCandidacy(
     @Param('id') id: number,
     @Body() smartVoteCandidacy: CandidacyDto,
   ) {
     return this.smartVoteService.updateCandidacy(id, smartVoteCandidacy);
+  }
+
+  @Post('update-election')
+  async updateElection(
+    @Param('id') id: number,
+    @Body() smartVoteElection: ElectionDto,
+  ) {
+    return this.smartVoteService.updateElection(id, smartVoteElection);
   }
 
   // @Get(':id')
