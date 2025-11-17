@@ -24,10 +24,35 @@ import { log } from 'console';
 export class SmartVoteController {
   constructor(private readonly smartVoteService: SmartVoteService) {}
 
-  // insert candidate
-  @Post('candidates')
+  //* insert candidate
+  @Post('insert-candidates')
   createCandidate(@Body() smartVoteCandidate: CandidatesDto) {
     return this.smartVoteService.createCandidate(smartVoteCandidate);
+  }
+
+  //* Get All Candidates
+  @Get('get/candidates')
+  async findAllCandidates() {
+    try {
+      return await this.smartVoteService.findAllCandidates();
+    } catch (error) {
+      // Return an error response if service fails
+      throw new HttpException(
+        error.message || 'Failed to retrieve candidates.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+  //* Get Candidate By ID
+  @Post('find-candidate/:student_id')
+  async findCandidateById(
+    @Param('student_id') student_id: string,
+    @Body() smartVoteCandidate: CandidatesDto,
+  ) {
+    return this.smartVoteService.findCandidatesByID(
+      student_id,
+      smartVoteCandidate,
+    );
   }
 
   // update candidate
@@ -47,7 +72,7 @@ export class SmartVoteController {
     return this.smartVoteService.createVoter(smartVoteVoter);
   }
 
-  @Post('admins')
+  @Post('create-admin')
   createAdmin(@Body() smartVoteAdmin: AdminDto) {
     return this.smartVoteService.createAdmin(smartVoteAdmin);
   }
@@ -57,20 +82,7 @@ export class SmartVoteController {
     return this.smartVoteService.createVotes(smartVoteVotes);
   }
 
-  @Get('get/candidates')
-  async findAllCandidates() {
-    try {
-      return await this.smartVoteService.findAllCandidates();
-    } catch (error) {
-      // Return an error response if service fails
-      throw new HttpException(
-        error.message || 'Failed to retrieve candidates.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @Post('login-voter')
+  @Post('voters-login')
   async loginVoter(@Body() body: { student_id: string; password: string }) {
     const { student_id, password } = body;
 
@@ -84,11 +96,14 @@ export class SmartVoteController {
     if (loginResult.success) {
       return {
         statusCode: 200,
+        success: loginResult.success,
         message: loginResult.message,
+        data: loginResult.data,
       };
     } else {
       return {
         statusCode: 401,
+        success: loginResult.success,
         message: loginResult.message,
       };
     }

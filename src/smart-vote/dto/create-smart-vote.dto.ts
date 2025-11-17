@@ -2,15 +2,13 @@ export class CandidatesDto {
   student_id: string;
   firstname: string;
   lastname: string;
-  gender: string;
-  course: string;
-  year: string;
   email: string;
+  department: string;
   position: string;
-  election_type: string;
   party: string;
-  status: string;
-  filed_date: string;
+  about_yourself: string;
+  purpose: string;
+  election_type: string;
 }
 
 export class VotersDto {
@@ -34,10 +32,12 @@ export class VotesDto {
 }
 export class AdminDto {
   admin_id: string;
-  firstname: string;
-  lastname: string;
+  password: string;
+  fullname: string;
   email: string;
-  admin_dept: string;
+  departments: string[];
+  position: string;
+  added_by: string;
 }
 
 export class CandidacyDto {

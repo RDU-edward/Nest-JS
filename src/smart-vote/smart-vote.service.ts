@@ -28,21 +28,19 @@ export class SmartVoteService {
           smartVoteCandidate.student_id,
           smartVoteCandidate.firstname,
           smartVoteCandidate.lastname,
-          smartVoteCandidate.gender,
-          smartVoteCandidate.course,
-          smartVoteCandidate.year,
           smartVoteCandidate.email,
+          smartVoteCandidate.department,
           smartVoteCandidate.position,
-          smartVoteCandidate.election_type,
           smartVoteCandidate.party,
-          smartVoteCandidate.status,
-          smartVoteCandidate.filed_date,
+          smartVoteCandidate.about_yourself,
+          smartVoteCandidate.purpose,
+          smartVoteCandidate.election_type,
         ],
       );
 
       return {
         success: true,
-        message: 'Candidate added successfully',
+        message: 'Candidacy filed Successfully',
         data: insertResult,
       };
     } catch (error) {
@@ -72,7 +70,10 @@ export class SmartVoteService {
     try {
       const result = await this.database.callStoredProcedure(
         'updateCandidate',
-        [updateSmartVoteCandidate.student_id, updateSmartVoteCandidate.course],
+        [
+          updateSmartVoteCandidate.student_id,
+          updateSmartVoteCandidate.department,
+        ],
       );
 
       // Check if the result is null or undefined (no rows affected)
@@ -177,15 +178,14 @@ export class SmartVoteService {
 
       // Assume `result[0][0].passwordHash` is the field where the hashed password is stored
       const storedPasswordHash = result[0][0].password;
-
+      const responseData = result[0][0];
       // Compare the plain password with the stored hash
       const isPasswordValid = await this.passwordHashService.comparePasswords(
         plainPassword,
         storedPasswordHash,
       );
 
-      console.log(plainPassword);
-      console.log(storedPasswordHash);
+      console.log(result[0][0]);
 
       console.log(isPasswordValid);
 
@@ -193,6 +193,7 @@ export class SmartVoteService {
         return {
           success: true,
           message: 'Login successful',
+          data: responseData,
         };
       } else {
         return {
@@ -212,12 +213,14 @@ export class SmartVoteService {
   //Insert Admins
   async createAdmin(smartVoteAdmin: AdminDto) {
     try {
-      const result = await this.database.callStoredProcedure('insertAdmins', [
+      const result = await this.database.callStoredProcedure('createAdmin', [
         smartVoteAdmin.admin_id,
-        smartVoteAdmin.firstname,
-        smartVoteAdmin.lastname,
+        smartVoteAdmin.password,
+        smartVoteAdmin.fullname,
         smartVoteAdmin.email,
-        smartVoteAdmin.admin_dept,
+        smartVoteAdmin.departments.join(','),
+        smartVoteAdmin.position,
+        smartVoteAdmin.added_by,
       ]);
       return {
         success: true,
@@ -283,6 +286,34 @@ export class SmartVoteService {
         data: result,
       };
     } catch (error) {
+      console.error('Error retrieving candidates:', error);
+      throw new Error('Failed to retrieve candidates. Please try again later.');
+    }
+  }
+
+  //Find Candidates by ID
+  async findCandidatesByID(
+    student_id: string,
+    smartVoteCandidate: CandidatesDto,
+  ) {
+    try {
+      // Assuming 'findCandidates' stored procedure takes a student_id
+      const [result] = await this.database.callStoredProcedure(
+        'findCandidates',
+        [student_id],
+      );
+
+      // if (!result || result.length === 0) {
+      //   throw new Error('No candidates found for the provided student ID.');
+      // }
+
+      return {
+        success: true,
+        message: 'Candidates retrieved successfully.',
+        data: result,
+      };
+    } catch (error) {
+      // Log the error and throw a more descriptive, custom error
       console.error('Error retrieving candidates:', error);
       throw new Error('Failed to retrieve candidates. Please try again later.');
     }

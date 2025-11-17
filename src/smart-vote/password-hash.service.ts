@@ -36,7 +36,7 @@ export class PasswordHashService {
 }
 
 // To test the password comparison manually:
-(async () => {
-  const passwordService = new PasswordHashService();
-  await passwordService.testPassword();
-})();
+// (async () => {
+//   const passwordService = new PasswordHashService();
+//   await passwordService.testPassword();
+// })();
