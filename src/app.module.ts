@@ -15,6 +15,8 @@ import { SmartVoteModule } from './smart-vote/smart-vote.module';
     }),
 
     SmartVoteModule,
+    ConfigModule,
+
     // ExampleModule,
     // MerchantModule,
   ],

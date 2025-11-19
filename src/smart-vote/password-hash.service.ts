@@ -24,9 +24,9 @@ export class PasswordHashService {
 
   // Test password comparison
   async testPassword() {
-    const plainPassword = 'test';
+    const plainPassword = 'test123';
     const storedHash =
-      '$2b$10$YyQrSDQ4iNzOD.l.2UTVXe0QVyWTBIFyDcKMmRDnp.g8i95TMEYzG';
+      '$2b$10$cWRWTDaTUBm2.VLiu0FVn.jNrEpXsVRyj4yyS0hTkb7Lbi3f0lSy.';
 
     // Compare plain password with the stored hash
     const isPasswordValid = await bcrypt.compare(plainPassword, storedHash);
@@ -35,7 +35,7 @@ export class PasswordHashService {
   }
 }
 
-// To test the password comparison manually:
+// // To test the password comparison manually:
 // (async () => {
 //   const passwordService = new PasswordHashService();
 //   await passwordService.testPassword();

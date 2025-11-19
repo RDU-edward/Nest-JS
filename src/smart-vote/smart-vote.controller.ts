@@ -18,7 +18,6 @@ import {
   CandidacyDto,
   ElectionDto,
 } from './dto/create-smart-vote.dto';
-import { log } from 'console';
 
 @Controller('smart-vote')
 export class SmartVoteController {
@@ -43,7 +42,7 @@ export class SmartVoteController {
       );
     }
   }
-  //* Get Candidate By ID
+  //* Get Candidate By Student ID
   @Post('find-candidate/:student_id')
   async findCandidateById(
     @Param('student_id') student_id: string,
@@ -55,7 +54,7 @@ export class SmartVoteController {
     );
   }
 
-  // update candidate
+  //* Update candidate
   @Post('candidate-update')
   async updateCandidate(
     @Param('student_id') student_id: string,
@@ -67,14 +66,46 @@ export class SmartVoteController {
     );
   }
 
-  @Post('voters')
-  createVoter(@Body() smartVoteVoter: VotersDto) {
-    return this.smartVoteService.createVoter(smartVoteVoter);
-  }
-
+  //* Create Admin
   @Post('create-admin')
   createAdmin(@Body() smartVoteAdmin: AdminDto) {
     return this.smartVoteService.createAdmin(smartVoteAdmin);
+  }
+
+  //* Get All Admin
+  @Get('get-admins')
+  async getAllAdmin() {
+    try {
+      return await this.smartVoteService.getAllAdmins();
+    } catch (error) {
+      // Return an error response if service fails
+      throw new HttpException(
+        error.message || 'Failed to retrieve admins.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  //* Update admin by Admin ID
+  @Post('update-admin')
+  async updateAdminById(
+    // @Param('admin_id') admin_id: string,
+    @Body() smartVoteAdmin: AdminDto,
+  ) {
+    return this.smartVoteService.updateAdminByID(smartVoteAdmin);
+  }
+  //* Delete admin by Admin ID
+  @Post('delete-admin/:admin_id')
+  async deleteAdminById(
+    @Param('admin_id') admin_id: string,
+    // @Body() smartVoteAdmin: AdminDto,
+  ) {
+    return this.smartVoteService.deleteAdminByID(admin_id);
+  }
+
+  @Post('voters')
+  createVoter(@Body() smartVoteVoter: VotersDto) {
+    return this.smartVoteService.createVoter(smartVoteVoter);
   }
 
   @Post('votes')
@@ -133,5 +164,10 @@ export class SmartVoteController {
   // @Delete(':id')
   // remove(@Param('id') id: string) {
   //   return this.smartVoteService.remove(+id);
+  // }
+
+  // @Get('get-routes')
+  // getApiUrl(): object[] {
+  //   return this.smartVoteService.getApiUrl();
   // }
 }

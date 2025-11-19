@@ -19,7 +19,20 @@ export class SmartVoteService {
     private readonly passwordHashService: PasswordHashService,
   ) {}
 
-  //Insert Candidates with Student Existence Check
+  //ROUTES to be use in front end
+  // get(key: string): string | undefined {
+  //   return process.env[key];
+  // }
+  // getApiUrl(): object[] {
+  //   return [
+  //     { BASE_URL: process.env.BASE_URL ?? '' }, // Default to empty string if API_URL is undefined
+  //     { NODE_MAILER_ROUTE: process.env.NODE_MAILER_ROUTE ?? '' }, // Default to empty string if FILE_PATH is undefined
+  //     { FILE_PATH_ROUTE: process.env.FILE_PATH_ROUTE ?? '' }, // Default to empty string if FILE_PATH is undefined
+  //     { WEBSITE_URL: process.env.WEBSITE_URL ?? '' }, // Default to empty string if FILE_PATH is undefined
+  //   ];
+  // }
+
+  //*Insert Candidates with Student Existence Check
   async createCandidate(smartVoteCandidate: CandidatesDto) {
     try {
       const insertResult = await this.database.callStoredProcedure(
@@ -62,7 +75,7 @@ export class SmartVoteService {
     }
   }
 
-  // update candidate
+  //* Update Candidate
   async updateCandidate(
     student_id: string,
     updateSmartVoteCandidate: CandidatesDto,
@@ -95,7 +108,7 @@ export class SmartVoteService {
     }
   }
 
-  //Insert Voters
+  //* Insert Voters
   async createVoter(smartVoteVoter: VotersDto) {
     try {
       const result = await this.database.callStoredProcedure('findStudent', [
@@ -132,7 +145,7 @@ export class SmartVoteService {
       } catch (error) {
         // Check if the err
         // or is related to the "Student ID already exists"
-        console.log(error.message);
+        // console.log(error.message);
 
         if (error.message.includes('Student ID already exists')) {
           return {
@@ -160,8 +173,7 @@ export class SmartVoteService {
     }
   }
 
-  //login as voters
-  // Login function as voters
+  //* Login function as voters
   async voterLogin(student_id: string, plainPassword: string) {
     try {
       // Get the stored password hash for the voter
@@ -210,7 +222,7 @@ export class SmartVoteService {
     }
   }
 
-  //Insert Admins
+  //* Insert Admins
   async createAdmin(smartVoteAdmin: AdminDto) {
     try {
       const result = await this.database.callStoredProcedure('createAdmin', [
@@ -225,20 +237,93 @@ export class SmartVoteService {
       return {
         success: true,
         message: 'Admin added Successfully',
-        data: result,
       };
     } catch (error) {
       // Optionally log the error to a logging service
-      console.error('Error inserting Admin:', error);
 
-      throw new HttpException(
-        'Failed to add admin. Please try again later.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      if (error.message.includes('Admin ID already exists')) {
+        return {
+          success: false,
+          message: 'This Admin ID already exists.',
+        };
+      }
+      console.error('Error inserting admin:', error);
+      return {
+        success: false,
+        message: 'Error inserting admin',
+      };
     }
   }
 
-  //Insert Votes
+  //* Getting all Admins
+  async getAllAdmins() {
+    try {
+      // Call the stored procedure to get all candidates
+      const [result] = await this.database.callStoredProcedure('getAdmins');
+
+      // if (!result || result.length === 0) {
+      //   throw new Error('No candidates found');
+      // }
+
+      return {
+        success: true,
+        message: 'Candidates retrieved successfully',
+        data: result,
+      };
+    } catch (error) {
+      console.error('Error retrieving candidates:', error);
+      throw new Error('Failed to retrieve candidates. Please try again later.');
+    }
+  }
+
+  //* Update Admin by Admin ID
+  async updateAdminByID(updateAdminByID: AdminDto) {
+    try {
+      // Assuming 'findCandidates' stored procedure takes a student_id
+      const result = await this.database.callStoredProcedure('updateAdmin', [
+        updateAdminByID.admin_id,
+        updateAdminByID.fullname,
+        updateAdminByID.email,
+        updateAdminByID.position,
+        updateAdminByID.departments.join(','),
+      ]);
+      return {
+        success: true,
+        message: 'Admin updated successfully.',
+        data: result,
+      };
+    } catch (error) {
+      // Log the error and throw a more descriptive, custom error
+      console.error('Error updating admin:', error);
+      throw new Error('Failed to updated admin. Please try again later.');
+    }
+  }
+
+  //* Delete Admin by Admin ID
+  async deleteAdminByID(admin_id: string) {
+    try {
+      // Assuming 'findCandidates' stored procedure takes a student_id
+      const result = await this.database.callStoredProcedure('deleteAdmin', [
+        admin_id,
+      ]);
+
+      // if (!result || result.length === 0) {
+      //   throw new Error('No candidates found for the provided student ID.');
+      // }
+
+      return {
+        success: true,
+        message: 'Admin deleted successfully.',
+        data: result,
+      };
+    } catch (error) {
+      // Log the error and throw a more descriptive, custom error
+      console.error('Error deleting admin:', error);
+      throw new Error('Failed to delete admin. Please try again later.');
+    }
+  }
+
+  //* Insert Votes
   async createVotes(smartVoteVotes: VotesDto) {
     try {
       const result = await this.database.callStoredProcedure('insertVotes', [
@@ -269,7 +354,7 @@ export class SmartVoteService {
     }
   }
 
-  //Getting all Candidates
+  //* Getting all Candidates
   async findAllCandidates() {
     try {
       // Call the stored procedure to get all candidates
@@ -291,7 +376,7 @@ export class SmartVoteService {
     }
   }
 
-  //Find Candidates by ID
+  //* Find Candidates by ID
   async findCandidatesByID(
     student_id: string,
     smartVoteCandidate: CandidatesDto,
@@ -390,10 +475,6 @@ export class SmartVoteService {
 
   // findOne(id: number) {
   //   return `This action returns a #${id} smartVote`;
-  // }
-
-  // remove(id: number) {
-  //   return `This action removes a #${id} smartVote`;
   // }
 }
 
