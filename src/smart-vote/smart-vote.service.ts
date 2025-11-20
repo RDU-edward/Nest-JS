@@ -75,17 +75,84 @@ export class SmartVoteService {
     }
   }
 
-  //* Update Candidate
-  async updateCandidate(
+  //* Getting all Candidates
+  async findAllCandidates() {
+    try {
+      // Call the stored procedure to get all candidates
+      const [result] =
+        await this.database.callStoredProcedure('getAllCandidates');
+
+      if (!result || result.length === 0) {
+        throw new Error('No candidates found');
+      }
+
+      return {
+        success: true,
+        message: 'Candidates retrieved successfully',
+        data: result,
+      };
+    } catch (error) {
+      console.error('Error retrieving candidates:', error);
+      throw new Error('Failed to retrieve candidates. Please try again later.');
+    }
+  }
+
+  //* Find Candidates by ID
+  async findCandidatesByID(
     student_id: string,
-    updateSmartVoteCandidate: CandidatesDto,
+    smartVoteCandidate: CandidatesDto,
   ) {
+    try {
+      // Assuming 'findCandidates' stored procedure takes a student_id
+      const [result] = await this.database.callStoredProcedure(
+        'findCandidates',
+        [student_id],
+      );
+
+      // if (!result || result.length === 0) {
+      //   throw new Error('No candidates found for the provided student ID.');
+      // }
+
+      return {
+        success: true,
+        message: 'Candidates retrieved successfully.',
+        data: result,
+      };
+    } catch (error) {
+      // Log the error and throw a more descriptive, custom error
+      console.error('Error retrieving candidates:', error);
+      throw new Error('Failed to retrieve candidates. Please try again later.');
+    }
+  }
+
+  //* Get Candidates by Election Type
+  async getCandidates(election_type: string) {
+    try {
+      // Assuming 'findCandidates' stored procedure takes a student_id
+      const [result] = await this.database.callStoredProcedure(
+        'getCandidates',
+        [election_type],
+      );
+      return {
+        success: true,
+        message: 'Candidates retrieved successfully.',
+        data: result,
+      };
+    } catch (error) {
+      console.error('Error retrieving candidates:', error);
+      throw new Error('Failed to retrieve candidates. Please try again later.');
+    }
+  }
+
+  //* Update Candidate
+  async updateCandidate(updateSmartVoteCandidate: CandidatesDto) {
     try {
       const result = await this.database.callStoredProcedure(
         'updateCandidate',
         [
           updateSmartVoteCandidate.student_id,
-          updateSmartVoteCandidate.department,
+          updateSmartVoteCandidate.status,
+          updateSmartVoteCandidate.remarks,
         ],
       );
 
@@ -354,56 +421,6 @@ export class SmartVoteService {
     }
   }
 
-  //* Getting all Candidates
-  async findAllCandidates() {
-    try {
-      // Call the stored procedure to get all candidates
-      const [result] =
-        await this.database.callStoredProcedure('getAllCandidates');
-
-      if (!result || result.length === 0) {
-        throw new Error('No candidates found');
-      }
-
-      return {
-        success: true,
-        message: 'Candidates retrieved successfully',
-        data: result,
-      };
-    } catch (error) {
-      console.error('Error retrieving candidates:', error);
-      throw new Error('Failed to retrieve candidates. Please try again later.');
-    }
-  }
-
-  //* Find Candidates by ID
-  async findCandidatesByID(
-    student_id: string,
-    smartVoteCandidate: CandidatesDto,
-  ) {
-    try {
-      // Assuming 'findCandidates' stored procedure takes a student_id
-      const [result] = await this.database.callStoredProcedure(
-        'findCandidates',
-        [student_id],
-      );
-
-      // if (!result || result.length === 0) {
-      //   throw new Error('No candidates found for the provided student ID.');
-      // }
-
-      return {
-        success: true,
-        message: 'Candidates retrieved successfully.',
-        data: result,
-      };
-    } catch (error) {
-      // Log the error and throw a more descriptive, custom error
-      console.error('Error retrieving candidates:', error);
-      throw new Error('Failed to retrieve candidates. Please try again later.');
-    }
-  }
-
   //Update Candidacy Schedule
   async updateCandidacy(id: number, updateSmartVoteDto: CandidacyDto) {
     try {
@@ -439,7 +456,6 @@ export class SmartVoteService {
   }
 
   //Update Election Schedule
-
   async updateElection(id: number, updateSmartVoteDto: ElectionDto) {
     try {
       const result = await this.database.callStoredProcedure('updateElection', [

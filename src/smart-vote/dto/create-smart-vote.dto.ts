@@ -9,6 +9,8 @@ export class CandidatesDto {
   about_yourself: string;
   purpose: string;
   election_type: string;
+  status: string;
+  remarks: string;
 }
 
 export class VotersDto {

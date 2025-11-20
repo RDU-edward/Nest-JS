@@ -55,15 +55,15 @@ export class SmartVoteController {
   }
 
   //* Update candidate
-  @Post('candidate-update')
-  async updateCandidate(
-    @Param('student_id') student_id: string,
-    @Body() updateSmartVoteCandidate: CandidatesDto,
-  ) {
-    return this.smartVoteService.updateCandidate(
-      student_id,
-      updateSmartVoteCandidate,
-    );
+  @Post('update-candidate')
+  async updateCandidate(@Body() updateSmartVoteCandidate: CandidatesDto) {
+    return this.smartVoteService.updateCandidate(updateSmartVoteCandidate);
+  }
+
+  //* Get Candidates by Election Type
+  @Post('get-candidates/:election_type')
+  async getCandidates(@Param('election_type') election_type: string) {
+    return this.smartVoteService.getCandidates(election_type);
   }
 
   //* Create Admin
