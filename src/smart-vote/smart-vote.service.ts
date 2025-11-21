@@ -289,6 +289,36 @@ export class SmartVoteService {
     }
   }
 
+  //* Login Admin
+
+  async loginAdmin(smartVoteAdmin: AdminDto) {
+    try {
+      const [result] = await this.database.callStoredProcedure('adminLogin', [
+        smartVoteAdmin.admin_id,
+        smartVoteAdmin.password,
+      ]);
+
+      if (result.length === 1) {
+        return {
+          success: true,
+          message: 'Successfully login',
+          data: result,
+        };
+      } else {
+        return {
+          success: false,
+          message: 'No data found',
+        };
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      return {
+        success: false,
+        message: 'An error occurred during login',
+      };
+    }
+  }
+
   //* Insert Admins
   async createAdmin(smartVoteAdmin: AdminDto) {
     try {
@@ -494,7 +524,57 @@ export class SmartVoteService {
   // }
 }
 
-//stored procedure call examples in service file:
+//* stored procedure call examples in service file:
+
+//? adminLogin
+/**
+ BEGIN
+  -- Query to find the voter by student_id
+    SELECT *
+    FROM test_Test.admins
+    WHERE admin_id = _admin_id AND `password`=_password;
+END
+ */
+
+//? createAdmin
+/*BEGIN
+
+    -- Check if the admin_id already exists in the table
+    IF EXISTS (SELECT 1 FROM test_Test.admins WHERE admin_id = _admin_id) THEN
+        -- If the admin_id exists, exit the procedure and return an error or message
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Admin ID already exists';
+    ELSE
+        -- If admin_id does not exist, proceed with the insert
+      INSERT INTO test_Test.admins (admin_id, `password`, fullname, email, departments, `position`, `role`, added_by, date_added) 
+		VALUES (_admin_id, _password, _fullname, _email, _departments, _position, 'ADMIN', _added_by, NOW());
+    END IF;
+
+END */
+
+//? deleteAdmin
+/* BEGIN
+DELETE FROM test_Test.admins WHERE admin_id = _admin_id;
+END */
+
+//? updateAdmin
+/**
+ BEGIN
+UPDATE test_Test.admins 
+SET fullname = _fullname,
+	 email = _email,
+	`position` = _position,
+	 departments = _departments
+	 WHERE admin_id = _admin_id;
+END
+ */
+
+//? getAdmins
+/**
+ BEGIN
+SELECT * FROM test_Test.admins;
+END
+ */
+
 //?findStudent:
 /* BEGIN
  SELECT * FROM test_Test.table0 WHERE student_id = _student_id AND firstname = _firstname;  
@@ -515,6 +595,27 @@ export class SmartVoteService {
             _position, _election_type, _party, _status, _filed_date);
     END IF;
 END*/
+
+//? findCandidates
+/*
+BEGIN
+SELECT * FROM test_Test.table1 WHERE student_id = _student_id;
+END
+*/
+
+//? getCandidates
+/*
+BEGIN
+SELECT * FROM test_Test.table1 WHERE election_type = _election_type AND YEAR(filed_date) = YEAR(NOW());
+END
+*/
+
+//? updateCandidate
+/*
+BEGIN
+SELECT * FROM test_Test.table1 WHERE election_type = _election_type AND YEAR(filed_date) = YEAR(NOW());
+END
+*/
 
 //?insertVoters;
 /*
@@ -582,7 +683,7 @@ SET election_type = _election_type,
 END
  */
 
-//?VotersLogin
+//?votersLogin
 /*BEGIN
   -- Query to find the voter by student_id
     SELECT student_id, `password`
@@ -687,3 +788,24 @@ AUTO_INCREMENT=15
 ;
 
  */
+
+//? AdminDb
+/*
+CREATE TABLE `admins` (
+	`id` INT(10) NOT NULL AUTO_INCREMENT,
+	`admin_id` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`role` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`password` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`fullname` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`email` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`departments` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`position` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`added_by` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+	`date_added` DATE NULL DEFAULT NULL,
+	PRIMARY KEY (`id`) USING BTREE
+)
+COLLATE='latin1_swedish_ci'
+ENGINE=InnoDB
+AUTO_INCREMENT=25
+;
+*/

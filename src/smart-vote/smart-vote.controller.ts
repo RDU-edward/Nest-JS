@@ -72,6 +72,12 @@ export class SmartVoteController {
     return this.smartVoteService.createAdmin(smartVoteAdmin);
   }
 
+  //* Login Admin
+  @Post('admin-login')
+  loginAdmin(@Body() smartVoteAdmin: AdminDto) {
+    return this.smartVoteService.loginAdmin(smartVoteAdmin);
+  }
+
   //* Get All Admin
   @Get('get-admins')
   async getAllAdmin() {
