@@ -613,7 +613,10 @@ END
 //? updateCandidate
 /*
 BEGIN
-SELECT * FROM test_Test.table1 WHERE election_type = _election_type AND YEAR(filed_date) = YEAR(NOW());
+UPDATE test_Test.table1
+SET `status` = _status,
+	 approver_remarks = _remarks
+	 WHERE student_id = _student_id;
 END
 */
 
@@ -709,26 +712,28 @@ AUTO_INCREMENT=4
 
 //?CandidatesDb
 /**
- CREATE TABLE `table1` (
+CREATE TABLE `candidates` (
 	`id` INT(10) NOT NULL AUTO_INCREMENT,
 	`student_id` VARCHAR(50) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
 	`firstname` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
 	`lastname` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
-	`gender` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
-	`course` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
-	`year` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
 	`email` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`department` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
 	`position` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
-	`election_type` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
 	`party` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`about_yourself` LONGTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`purpose` LONGTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`election_type` VARCHAR(50) NOT NULL DEFAULT '' COLLATE 'latin1_swedish_ci',
 	`status` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
-	`filed_date` VARCHAR(50) NOT NULL COLLATE 'latin1_swedish_ci',
+	`approver_remarks` LONGTEXT NOT NULL COLLATE 'latin1_swedish_ci',
+	`filed_date` DATE NOT NULL DEFAULT '0000-00-00',
 	PRIMARY KEY (`id`) USING BTREE
 )
 COLLATE='latin1_swedish_ci'
 ENGINE=InnoDB
-AUTO_INCREMENT=10
+AUTO_INCREMENT=13
 ;
+
 
  */
 
