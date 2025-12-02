@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  Body,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Param,
+} from '@nestjs/common';
 import {
   AdminDto,
   CandidatesDto,
@@ -131,6 +137,25 @@ export class SmartVoteService {
       // Assuming 'findCandidates' stored procedure takes a student_id
       const [result] = await this.database.callStoredProcedure(
         'getCandidates',
+        [election_type],
+      );
+      return {
+        success: true,
+        message: 'Candidates retrieved successfully.',
+        data: result,
+      };
+    } catch (error) {
+      console.error('Error retrieving candidates:', error);
+      throw new Error('Failed to retrieve candidates. Please try again later.');
+    }
+  }
+
+  //* Get Approved Candidates
+  async getApprovedCandidates(election_type: string) {
+    try {
+      // Assuming 'findCandidates' stored procedure takes a student_id
+      const [result] = await this.database.callStoredProcedure(
+        'getApprovedCandidates',
         [election_type],
       );
       return {
@@ -420,46 +445,31 @@ export class SmartVoteService {
     }
   }
 
-  //* Insert Votes
-  async createVotes(smartVoteVotes: VotesDto) {
+  //*Get Candidacy Schedule
+  async getCandidacySchedule(candidacy_type: string) {
     try {
-      const result = await this.database.callStoredProcedure('insertVotes', [
-        smartVoteVotes.voters_id,
-        smartVoteVotes.firstname,
-        smartVoteVotes.lastname,
-        smartVoteVotes.email,
-        smartVoteVotes.department,
-        smartVoteVotes.election_type,
-        smartVoteVotes.president,
-        smartVoteVotes.vice_president,
-        smartVoteVotes.voters_id,
-      ]);
-
+      const [result] = await this.database.callStoredProcedure(
+        'getCandidacySchedule',
+        [candidacy_type],
+      );
       return {
         success: true,
-        message: 'Votes Inserted Successfully.',
+        message: 'Candidacy Schedule Retrieved',
         data: result,
       };
     } catch (error) {
-      // Optionally log the error to a logging service
-      console.error('Error inserting Votes:', error);
-
-      throw new HttpException(
-        'Failed to add votes. Please try again later.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      // Log the error and throw a more descriptive, custom error
+      console.error(error);
+      throw new Error('Error Retrieving Candidacy Schedule');
     }
   }
-
-  //Update Candidacy Schedule
-  async updateCandidacy(id: number, updateSmartVoteDto: CandidacyDto) {
+  //* Update Candidacy Schedule
+  async updateCandidacy(updateSmartVoteDto: CandidacyDto) {
     try {
       const result = await this.database.callStoredProcedure(
         'updateCandidacy',
         [
-          updateSmartVoteDto.id,
           updateSmartVoteDto.candidacy_type,
-          updateSmartVoteDto.open_date,
           updateSmartVoteDto.close_date,
           updateSmartVoteDto.status,
           updateSmartVoteDto.opened_by,
@@ -485,13 +495,33 @@ export class SmartVoteService {
     }
   }
 
-  //Update Election Schedule
-  async updateElection(id: number, updateSmartVoteDto: ElectionDto) {
+  //*Get Election Schedule
+  async getElectionSchedule(election_type: string) {
+    try {
+      const [result] = await this.database.callStoredProcedure(
+        'getElectionSchedule',
+        [election_type],
+      );
+
+      return {
+        success: true,
+        message: 'Election Schedule Retrieve',
+        data: result,
+      };
+    } catch (error) {
+      console.error('Error retrieving election schedule:', error);
+      throw new HttpException(
+        'Failed to update election schedule',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+  }
+
+  //*Update Election Schedule
+  async updateElectionSchedule(updateSmartVoteDto: ElectionDto) {
     try {
       const result = await this.database.callStoredProcedure('updateElection', [
-        updateSmartVoteDto.id,
         updateSmartVoteDto.election_type,
-        updateSmartVoteDto.open_date,
         updateSmartVoteDto.close_date,
         updateSmartVoteDto.status,
         updateSmartVoteDto.opened_by,
@@ -515,6 +545,64 @@ export class SmartVoteService {
       throw new HttpException(
         'Failed to update election schedule',
         HttpStatus.NOT_FOUND,
+      );
+    }
+  }
+
+  //?Votes
+  //* Insert Votes
+  async createVotes(smartVoteVotes: VotesDto) {
+    try {
+      const result = await this.database.callStoredProcedure('insertVotes', [
+        smartVoteVotes.student_id,
+        smartVoteVotes.voters_id,
+        smartVoteVotes.fullname,
+        smartVoteVotes.email,
+        smartVoteVotes.department,
+        smartVoteVotes.election_type,
+        smartVoteVotes.president,
+        smartVoteVotes.vice_president,
+        smartVoteVotes.secretary,
+      ]);
+
+      return {
+        success: true,
+        message:
+          "Awesome! You've already voted. Thanks for taking part in the process!",
+        data: result,
+      };
+    } catch (error) {
+      if (error.message.includes('Student Already Voted')) {
+        return {
+          success: false,
+          message: "Looks like you've already cast your vote!",
+        };
+      }
+      console.error('Error inserting admin:', error);
+      return {
+        success: false,
+        message: 'Error inserting admin',
+      };
+    }
+  }
+
+  //? Get Vote History
+  async getVoteHistory(smartVoteVotes: VotesDto) {
+    try {
+      const [result] = await this.database.callStoredProcedure(
+        'getVoteHistory',
+        [smartVoteVotes.student_id, smartVoteVotes.voters_id],
+      );
+
+      return {
+        success: true,
+        message: 'Votes retrieve successful',
+        data: result,
+      };
+    } catch (error) {
+      console.error('Error retrieving vote history:', error);
+      throw new Error(
+        'Failed to retrieve vote history. Please try again later.',
       );
     }
   }
@@ -656,30 +744,44 @@ DECLARE v_year CHAR(4);
     END IF;
 END*/
 
+//?getCandidacySchedule
+/*
+BEGIN
+SELECT * FROM test_Test.table2 WHERE candidacy_type = _candidacy_type;
+END
+*/
+
 //?updateCandidacy:
 /*BEGIN
 UPDATE test_Test.table2 
-SET candidacy_type = _candidacy_type,
-	 open_date = _open_date,
+SET 
+	 open_date = NOW(),
 	 close_date = _close_date,
 	 `status` = _status,
 	 opened_by = _opened_by
-	 WHERE id = _id;
+	 WHERE candidacy_type = candidacy_type;
 	 
 	  -- Optionally return the number of affected rows
   #SELECT ROW_COUNT() AS rows_affected;
 END*/
 
+//?getElectionSchedule
+/*
+BEGIN
+SELECT * FROM test_Test.table4 WHERE election_type = _election_type;
+END
+*/
+
 //?updateElection:
 /**
- * BEGIN
+BEGIN
 UPDATE test_Test.table4 
-SET election_type = _election_type,
-	 open_date = _open_date,
+SET 
+	 open_date = NOW(),
 	 close_date = _close_date,
 	 `status` = _status,
 	 opened_by = _opened_by
-	 WHERE id = _id;
+	 WHERE election_type = _election_type;
 	 
 	  -- Optionally return the number of affected rows
   #SELECT ROW_COUNT() AS rows_affected;
@@ -693,6 +795,35 @@ END
     FROM test_Test.table3
     WHERE student_id = _student_id;
 END*/
+
+//? getApprovedCandidates
+/*BEGIN
+SELECT * FROM test_Test.table1 WHERE election_type = _election_type AND `status` = "APPROVED" AND YEAR(filed_date) = YEAR(NOW());
+END */
+
+//? insertVotes
+/*BEGIN
+
+    -- Check if the student_id already exists in the table
+    IF EXISTS (SELECT 1 FROM test_Test.table5 WHERE student_id = _student_id AND election_type = _election_type ) THEN
+        -- If the student_id exists, exit the procedure and return an error or message
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Student Already Voted';
+    ELSE
+        -- If student_id does not exist, proceed with the insert
+       INSERT INTO test_Test.table5 (student_id, voters_id, fullname, email, department, election_type, president, vice_president, secretary, voted_date)
+		 VALUES (_student_id, _voters_id, _fullname, _email, _department, _election_type, _president, _vice_president, _secretary, NOW());
+    END IF;
+
+END
+
+*/
+
+//? getVoteHistory
+/*
+BEGIN
+SELECT * FROM test_Test.table5 WHERE student_id = _student_id AND voters_id = _voters_id;
+END
+*/
 
 //Database
 
@@ -814,3 +945,23 @@ ENGINE=InnoDB
 AUTO_INCREMENT=25
 ;
 */
+
+//?VoteHistory
+// CREATE TABLE `votehitory` (
+// 	`id` INT(10) NOT NULL AUTO_INCREMENT,
+// 	`student_id` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+// 	`voters_id` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+// 	`fullname` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+// 	`email` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+// 	`department` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+// 	`election_type` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+// 	`president` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+// 	`vice_president` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+// 	`secretary` VARCHAR(50) NULL DEFAULT NULL COLLATE 'latin1_swedish_ci',
+// 	`voted_date` DATE NULL DEFAULT NULL,
+// 	PRIMARY KEY (`id`) USING BTREE
+// )
+// COLLATE='latin1_swedish_ci'
+// ENGINE=InnoDB
+// AUTO_INCREMENT=18
+// ;

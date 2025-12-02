@@ -22,14 +22,15 @@ export class VotersDto {
   password: string;
 }
 export class VotesDto {
+  student_id: string;
   voters_id: string;
-  firstname: string;
-  lastname: string;
+  fullname: string;
   email: string;
   department: string;
   election_type: string;
   president: string;
   vice_president: string;
+  secretary: string;
   voted_date: string;
 }
 export class AdminDto {
@@ -43,18 +44,14 @@ export class AdminDto {
 }
 
 export class CandidacyDto {
-  id: number;
   candidacy_type: string;
-  open_date: string;
   close_date: string;
   status: string;
   opened_by: string;
 }
 
 export class ElectionDto {
-  id: number;
   election_type: string;
-  open_date: string;
   close_date: string;
   status: string;
   opened_by: string;

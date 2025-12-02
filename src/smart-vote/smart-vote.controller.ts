@@ -18,10 +18,14 @@ import {
   CandidacyDto,
   ElectionDto,
 } from './dto/create-smart-vote.dto';
+import { MailerService } from './mailer.services';
 
 @Controller('smart-vote')
 export class SmartVoteController {
-  constructor(private readonly smartVoteService: SmartVoteService) {}
+  constructor(
+    private readonly smartVoteService: SmartVoteService,
+    private readonly mailerService: MailerService,
+  ) {}
 
   //* insert candidate
   @Post('insert-candidates')
@@ -64,6 +68,12 @@ export class SmartVoteController {
   @Post('get-candidates/:election_type')
   async getCandidates(@Param('election_type') election_type: string) {
     return this.smartVoteService.getCandidates(election_type);
+  }
+
+  //* Get Approved Candidates
+  @Post('approved-candidates/:election_type')
+  async getApprovedCandidates(@Param('election_type') election_type: string) {
+    return this.smartVoteService.getApprovedCandidates(election_type);
   }
 
   //* Create Admin
@@ -114,11 +124,6 @@ export class SmartVoteController {
     return this.smartVoteService.createVoter(smartVoteVoter);
   }
 
-  @Post('votes')
-  createVotes(@Body() smartVoteVotes: VotesDto) {
-    return this.smartVoteService.createVotes(smartVoteVotes);
-  }
-
   @Post('voters-login')
   async loginVoter(@Body() body: { student_id: string; password: string }) {
     const { student_id, password } = body;
@@ -146,20 +151,40 @@ export class SmartVoteController {
     }
   }
 
+  //* Get Candidacy Schedule
+
+  @Post('get-candidacy-schedule/:candidacy_type')
+  async getCandidacySchedule(@Param('candidacy_type') candidacy_type: string) {
+    return this.smartVoteService.getCandidacySchedule(candidacy_type);
+  }
+  //* Update Candidacy Schedule
   @Post('update-candidacy')
-  async updateCandidacy(
-    @Param('id') id: number,
-    @Body() smartVoteCandidacy: CandidacyDto,
-  ) {
-    return this.smartVoteService.updateCandidacy(id, smartVoteCandidacy);
+  async updateCandidacy(@Body() smartVoteCandidacy: CandidacyDto) {
+    return this.smartVoteService.updateCandidacy(smartVoteCandidacy);
   }
 
+  //*Get Election Schedule
+  @Post('get-election-schedule/:election_type')
+  async getElectionSchedule(@Param('election_type') election_type: string) {
+    return this.smartVoteService.getElectionSchedule(election_type);
+  }
+
+  //*Update Election Schedule
   @Post('update-election')
-  async updateElection(
-    @Param('id') id: number,
-    @Body() smartVoteElection: ElectionDto,
-  ) {
-    return this.smartVoteService.updateElection(id, smartVoteElection);
+  async updateElection(@Body() smartVoteElection: ElectionDto) {
+    return this.smartVoteService.updateElectionSchedule(smartVoteElection);
+  }
+
+  //* Votes
+  @Post('insert-votes')
+  createVotes(@Body() smartVoteVotes: VotesDto) {
+    return this.smartVoteService.createVotes(smartVoteVotes);
+  }
+
+  //* Get Vote History
+  @Post('vote-history')
+  getVoteHistory(@Body() smartVoteVotes: VotesDto) {
+    return this.smartVoteService.getVoteHistory(smartVoteVotes);
   }
 
   // @Get(':id')
@@ -176,4 +201,18 @@ export class SmartVoteController {
   // getApiUrl(): object[] {
   //   return this.smartVoteService.getApiUrl();
   // }
+
+  @Post('send-email')
+  async sendEmail(
+    @Body()
+    emailData: {
+      to: string;
+      subject: string;
+      text: string;
+      html: string;
+    },
+  ) {
+    await this.mailerService.sendEmail(emailData);
+    return { message: 'Email sent successfully' };
+  }
 }
