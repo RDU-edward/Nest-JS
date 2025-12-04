@@ -11,6 +11,7 @@ export class CandidatesDto {
   election_type: string;
   status: string;
   remarks: string;
+  candidate_profile: string;
 }
 
 export class VotersDto {
@@ -20,6 +21,7 @@ export class VotersDto {
   department: string;
   email: string;
   password: string;
+  face_descriptor: string;
 }
 export class VotesDto {
   student_id: string;

@@ -41,6 +41,9 @@ export class SmartVoteService {
   //*Insert Candidates with Student Existence Check
   async createCandidate(smartVoteCandidate: CandidatesDto) {
     try {
+      // If there's an image, update the candidate_profile with the image path
+      if (smartVoteCandidate.candidate_profile) {
+      }
       const insertResult = await this.database.callStoredProcedure(
         'insertCandidate',
         [
@@ -54,6 +57,7 @@ export class SmartVoteService {
           smartVoteCandidate.about_yourself,
           smartVoteCandidate.purpose,
           smartVoteCandidate.election_type,
+          smartVoteCandidate.candidate_profile, // This will be the image URL or file path
         ],
       );
 
@@ -228,6 +232,7 @@ export class SmartVoteService {
           smartVoteVoter.department,
           smartVoteVoter.email,
           hashedPassword,
+          smartVoteVoter.face_descriptor,
         ]);
         return {
           success: true,

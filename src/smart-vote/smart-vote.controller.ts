@@ -8,6 +8,8 @@ import {
   Delete,
   HttpException,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { SmartVoteService } from './smart-vote.service';
 import {
@@ -19,13 +21,36 @@ import {
   ElectionDto,
 } from './dto/create-smart-vote.dto';
 import { MailerService } from './mailer.services';
-
+import { FileInterceptor } from '@nestjs/platform-express';
+import * as fs from 'fs';
+import { join } from 'path';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 @Controller('smart-vote')
 export class SmartVoteController {
   constructor(
     private readonly smartVoteService: SmartVoteService,
     private readonly mailerService: MailerService,
   ) {}
+
+  @Post('image')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, callback) => {
+          const fileName = Date.now() + extname(file.originalname);
+          callback(null, fileName);
+        },
+      }),
+    }),
+  )
+  uploadFile(@UploadedFile() file) {
+    return {
+      message: 'File uploaded successfully',
+      file: file,
+    };
+  }
 
   //* insert candidate
   @Post('insert-candidates')
