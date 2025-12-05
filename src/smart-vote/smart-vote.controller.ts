@@ -52,6 +52,20 @@ export class SmartVoteController {
     };
   }
 
+  //* Get All students
+
+  @Get('get-students')
+  async getAllStudents() {
+    try {
+      return await this.smartVoteService.getAllStudents();
+    } catch (error) {
+      // Return an error response if service fails
+      throw new HttpException(
+        error.message || 'Failed to retrieve candidates.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
   //* insert candidate
   @Post('insert-candidates')
   createCandidate(@Body() smartVoteCandidate: CandidatesDto) {
@@ -63,13 +77,7 @@ export class SmartVoteController {
   async findAllCandidates() {
     try {
       return await this.smartVoteService.findAllCandidates();
-    } catch (error) {
-      // Return an error response if service fails
-      throw new HttpException(
-        error.message || 'Failed to retrieve candidates.',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    } catch (error) {}
   }
   //* Get Candidate By Student ID
   @Post('find-candidate/:student_id')
@@ -144,11 +152,27 @@ export class SmartVoteController {
     return this.smartVoteService.deleteAdminByID(admin_id);
   }
 
+  //* Voters
   @Post('voters')
   createVoter(@Body() smartVoteVoter: VotersDto) {
     return this.smartVoteService.createVoter(smartVoteVoter);
   }
 
+  //* Get All Voters
+  @Get('get-voters')
+  async getAllVoters() {
+    try {
+      return await this.smartVoteService.getAllVoters();
+    } catch (error) {
+      console.error(error);
+      throw new HttpException(
+        error.message || 'Failed to retrieve admins.',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  //* Voters Login
   @Post('voters-login')
   async loginVoter(@Body() body: { student_id: string; password: string }) {
     const { student_id, password } = body;

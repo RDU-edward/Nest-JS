@@ -25,18 +25,29 @@ export class SmartVoteService {
     private readonly passwordHashService: PasswordHashService,
   ) {}
 
-  //ROUTES to be use in front end
-  // get(key: string): string | undefined {
-  //   return process.env[key];
-  // }
-  // getApiUrl(): object[] {
-  //   return [
-  //     { BASE_URL: process.env.BASE_URL ?? '' }, // Default to empty string if API_URL is undefined
-  //     { NODE_MAILER_ROUTE: process.env.NODE_MAILER_ROUTE ?? '' }, // Default to empty string if FILE_PATH is undefined
-  //     { FILE_PATH_ROUTE: process.env.FILE_PATH_ROUTE ?? '' }, // Default to empty string if FILE_PATH is undefined
-  //     { WEBSITE_URL: process.env.WEBSITE_URL ?? '' }, // Default to empty string if FILE_PATH is undefined
-  //   ];
-  // }
+  //* Get All Students
+  async getAllStudents() {
+    try {
+      const [result] =
+        await this.database.callStoredProcedure('getAllStudents');
+
+      if (!result || result.length === 0) {
+        throw new Error('No students found');
+      }
+
+      return {
+        success: true,
+        message: 'Students retrieved successfully',
+        data: result,
+      };
+    } catch (error) {
+      console.error('Error retrieving students:', error);
+      return {
+        success: false,
+        message: 'Error retrieving students',
+      };
+    }
+  }
 
   //*Insert Candidates with Student Existence Check
   async createCandidate(smartVoteCandidate: CandidatesDto) {
@@ -270,7 +281,30 @@ export class SmartVoteService {
     }
   }
 
-  //* Login function as voters
+  //* Get All Voters
+  async getAllVoters() {
+    try {
+      const [result] = await this.database.callStoredProcedure('getAllVoters');
+
+      if (!result || result.length === 0) {
+        throw new Error('No Records found');
+      }
+
+      return {
+        success: true,
+        message: 'Voters retrieved successfully',
+        data: result,
+      };
+    } catch (error) {
+      console.error('Error retrieving voters:', error);
+      return {
+        success: false,
+        message: 'Error retrieving voters',
+      };
+    }
+  }
+
+  //* Voters Login
   async voterLogin(student_id: string, plainPassword: string) {
     try {
       // Get the stored password hash for the voter
